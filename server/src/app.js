@@ -1,34 +1,48 @@
 //app.js
-// const chokidar = require('chokidar');
+const express = require('express');
+const WebSocket = require('ws');
+const app = express();
+const wss = new WebSocket.Server({ noServer:true });
 const { spawn } = require('child_process');
 const port = 3002;
-const express = require('express');
-const app = express();
-
 let child;
-// Watch all files in the project directory (modify the path if needed)
-// const watcher = chokidar.watch('./', {
-//   ignored: /node_modules|\.git/,
-//   persistent: true,
-// });
 
-// Log file changes
-// watcher.on('all', (event, path) => {
-//   console.log(`${event}: ${path}`);
-//   restartServer();
-// });
+wss.on('connection', (socket) => {
+  console.log('Client connected');
 
-app.get('/restart-server', (req,res) => {
-    restartServer();
-    res.send("Restarting server...");
+  // Listen for messages from clients
+  socket.on('message', (message) => {
+    console.log(`Received message: ${message}`);
+    
+    if (message == 'restart') {
+      restartServer();
+    }
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send('Server restarted successfully');
+      }
+    });
+  });
+
+  // Handle disconnection
+  socket.on('close', () => {
+    console.log('Client disconnected');
+  });
 });
 
-app.listen(port, (error) => {
-    if(error){
-        console.log('Something went wrong', error);
-    }else{
-        console.log(`Server is running on http://localhost:${port}`);
-    }
+// Attach the WebSocket server to the existing Express server
+const httpServer = app.listen(port, (error) => {
+  if(error){
+      console.log('Something went wrong', error);
+  }else{
+      console.log(`Server is running on http://localhost:${port}`);
+  }
+});
+
+httpServer.on('upgrade', (request, socket, head) => {
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit('connection', ws, request);
+  });
 });
 
 // Function to restart the server
@@ -52,5 +66,5 @@ function restartServer() {
   });
 }
 
-// console.log('Watching for file changes...');
+
 
