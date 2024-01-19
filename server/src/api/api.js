@@ -1,6 +1,12 @@
 const express = require('express');
+const dynamicSchema = require('./schema/schema');
 
 const router = express.Router()
+
+const clientFields = [];
+
+// Create or update the schema with the client-provided fields
+const DynamicModel = dynamicSchema.createOrUpdateSchema(clientFields);
 
 //Post Method
 router.post('/post', (req, res) => {
