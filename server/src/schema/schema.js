@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 
-var schemaVersion = 1;
+const dynamicSchema = new mongoose.Schema({});
 
 // Function to create or update the dynamic schema
-const createOrUpdateSchema = (fields) => {
-    const dynamicSchema = new mongoose.Schema({});
-    const dynamicSchemaDefinition = {};
+const createOrUpdateSchema = (fields,tableName) => {
+  const dynamicSchemaDefinition = {};
 
   // Add fields to the dynamic schema definition
   fields.forEach((field) => {
@@ -18,11 +17,8 @@ const createOrUpdateSchema = (fields) => {
   // Set the dynamic schema definition
   dynamicSchema.add(dynamicSchemaDefinition);
 
-  // Set the schema version
-  dynamicSchema.set('version', schemaVersion);
-
   // Create or update the model with the dynamic schema
-  return mongoose.model('DynamicData_V${schemaVersion}', dynamicSchema);
+  return mongoose.model(tableName, dynamicSchema);
 };
 
 module.exports = {

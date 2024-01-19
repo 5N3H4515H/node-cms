@@ -2,6 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const port = 3000;
 const express = require('express');
+
 const mongoose = require('mongoose');
 const routes = require('./api/api')
 const app = express();
@@ -19,6 +20,7 @@ database.once('connected', () => {
 })
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 app.use('/api',routes)
 
 app.get('/', async (req, res) => {
