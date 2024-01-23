@@ -1,57 +1,106 @@
-const express = require('express');
-const dynamicSchema = require('../schema/schema');
+const express = require("express");
+const dynamicSchema = require("../schema/schema");
+const { default: mongoose } = require("mongoose");
 
-const router = express.Router()
+const router = express.Router();
 
-const clientFields = [{ fieldName: 'name', fieldType: String },
-{ fieldName: 'age', fieldType: Number }];
+//Create a table with fields
+router.post("/create", async (req, res) => {
+  console.log("Request JSON:", req.body);
+  const { tableName, fields } = req.body;
+  try {
+    dynamicSchema.createOrUpdateSchema(fields, tableName);
+    res.status(201).json({ message: "Collection Created successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
-const customFields = [{ fieldName: 'gender', fieldType: String },
-{ fieldName: 'smallPeePee', fieldType: Boolean }];
+//Insert data in a table
+router.post("/insert/:tableName", async (req, res) => {
+  const { tableName } = req.params;
+  const fields = Object.keys(req.body).map((fieldName) => ({
+    fieldName,
+    fieldType: req.body[fieldName],
+  }));
+  const DynamicModel = dynamicSchema.createOrUpdateSchema(fields, tableName);
+  try {
+    const data = new DynamicModel(req.body);
+    const savedData = await data.save();
+    res.status(200).json(savedData);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
-//Post Method
-router.post('/create/:tableName', async(req, res) => {
-    const { tableName } = req.params;
-    console.log(req.body.data);
-    const DynamicModel = dynamicSchema.createOrUpdateSchema(clientFields, tableName);
+//Get all data of a specific table
+router.get("/get/:tableName", async (req, res) => {
+  const { tableName } = req.params;
+  const DynamicModel = dynamicSchema.createOrUpdateSchema([], tableName);
+  try {
+    const allData = await DynamicModel.find();
+    res.status(200).json(allData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-    try {
-        console.log(req.body);
-        const data = new DynamicModel(req.body);
-        const savedData = await data.save();
-        res.status(201).json(savedData);
+//Get table data by ID
+router.get("/getById/:tableName/:id", async (req, res) => {
+  const { tableName, id } = req.params;
+  const DynamicModel = dynamicSchema.createOrUpdateSchema([], tableName);
+  try {
+    const data = await DynamicModel.findById(id);
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+//Update table data by ID
+router.patch("/update/:tableName/:id", async (req, res) => {
+  const { tableName, id } = req.params;
+  const fields = Object.keys(req.body).map((fieldName) => ({
+    fieldName,
+    fieldType: req.body[fieldName],
+  }));
+  const DynamicModel = dynamicSchema.createOrUpdateSchema(fields, tableName);
+
+  try {
+    console.log(req.body);
+    const data = await DynamicModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+//Delete table data by ID
+router.delete("/delete/:tableName/:id", async (req, res) => {
+  const { tableName, id } = req.params;
+  const DynamicModel = dynamicSchema.createOrUpdateSchema([], tableName);
+  try {
+    await DynamicModel.findByIdAndDelete(id);
+    res.status(200).json({ message: "Data Deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+//Delete a table
+router.delete("/delete/:tableName/", async (req, res) => {
+  const { tableName } = req.params;
+  const DynamicModel = dynamicSchema.createOrUpdateSchema([], tableName);
+  const tableToDelete = DynamicModel.collection;
+  tableToDelete.drop((error) => {
+    if (error) {
+      res.status(400).json({ message: error.message });
+    } else {
+      res.status(200).json({ message: "Collection Dropped successfully" });
     }
-    catch (error) {
-        res.status(400).json({message: error.message})
-    }
-})
-
-//Get all Method
-router.get('/:tableName', async(req, res) => {
-    const { tableName } = req.params;
-    const DynamicModel = dynamicSchema.createOrUpdateSchema([], tableName);
-
-    try {
-        const allData = await DynamicModel.find();
-        res.status(200).json(allData);
-      } catch (error) {
-        res.status(500).json({ message: error.message });
-      }
-})
-
-//Get by ID Method
-router.get('/getOne/:id', (req, res) => {
-    res.send(req.params.id)
-})
-
-//Update by ID Method
-router.patch('/update/:id', (req, res) => {
-    res.send('Update by ID API')
-})
-
-//Delete by ID Method
-router.delete('/delete/:id', (req, res) => {
-    res.send('Delete by ID API')
-})
+  });
+});
 
 module.exports = router;

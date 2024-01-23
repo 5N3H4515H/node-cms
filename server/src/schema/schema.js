@@ -1,16 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const dynamicSchema = new mongoose.Schema({});
 
 // Function to create or update the dynamic schema
-const createOrUpdateSchema = (fields,tableName) => {
+const createOrUpdateSchema = (fields, tableName) => {
   const dynamicSchemaDefinition = {};
 
   // Add fields to the dynamic schema definition
   fields.forEach((field) => {
     const { fieldName, fieldType } = field;
     dynamicSchemaDefinition[fieldName] = {
-      type: fieldType || String, // Set a default type if not provided
+      type: typeof fieldType || String, // Set a default type if not provided
     };
   });
 
