@@ -6,7 +6,6 @@ const router = express.Router();
 
 //Create a table with fields
 router.post("/create", async (req, res) => {
-  console.log("Request JSON:", req.body);
   const { tableName, fields } = req.body;
   try {
     dynamicSchema.createOrUpdateSchema(fields, tableName);
@@ -65,9 +64,7 @@ router.patch("/update/:tableName/:id", async (req, res) => {
     fieldType: req.body[fieldName],
   }));
   const DynamicModel = dynamicSchema.createOrUpdateSchema(fields, tableName);
-
   try {
-    console.log(req.body);
     const data = await DynamicModel.findByIdAndUpdate(id, req.body, {
       new: true,
     });
