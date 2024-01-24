@@ -1,5 +1,28 @@
 import { useEffect, useState } from "react";
-import "./App.css";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import Login from "./pages/Login";
+import AuthLayout from "./layouts/AuthLayout";
+import DashBoard from "./pages/DashBoard";
+
+const router = createBrowserRouter([
+  // {
+  //   path: "/",
+  //   element: <Login />,
+  // },
+  {
+    element: <AuthLayout />,
+    children: [
+      {
+        path: "/dashboard",
+        element: <DashBoard />,
+      },
+    ],
+  },
+  // {
+  //   path: "/dashboard",
+  //   element: <DashBoard />,
+  // },
+]);
 
 function App() {
   const [socket, setSocket] = useState(null);
@@ -40,10 +63,11 @@ function App() {
 
   return (
     <div className="App">
-      <h1>WebSocket Client</h1>
+      {/* <h1>WebSocket Client</h1> */}
       {socket ? (
-        <button onClick={requestServerRestart}>Request Server Restart</button>
+        <RouterProvider router={router} />
       ) : (
+        // <button onClick={requestServerRestart}>Request Server Restart</button>
         <p>Connecting...</p>
       )}
     </div>
