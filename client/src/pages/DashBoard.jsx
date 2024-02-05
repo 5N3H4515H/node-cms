@@ -29,7 +29,7 @@ export default function DashBoard() {
                 margin: "10px",
               }}
               onClick={() => {
-                navigate("/addNewContent");
+                navigate("/addContentType");
               }}
             >
               <AddIcon sx={{ mr: "10px" }} />

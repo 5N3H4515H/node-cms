@@ -3,6 +3,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Login from "./pages/Login";
 import AuthLayout from "./layouts/AuthLayout";
 import DashBoard from "./pages/DashBoard";
+import ContentTypeForm from "./pages/ContentTypeForm";
 
 const router = createBrowserRouter([
   // {
@@ -16,12 +17,12 @@ const router = createBrowserRouter([
         path: "/dashboard",
         element: <DashBoard />,
       },
+      {
+        path: "/addContentType",
+        element: <ContentTypeForm />,
+      },
     ],
   },
-  // {
-  //   path: "/dashboard",
-  //   element: <DashBoard />,
-  // },
 ]);
 
 function App() {
